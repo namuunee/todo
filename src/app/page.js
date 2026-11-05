@@ -39,6 +39,72 @@ export default function Home() {
     });
 
     return (
-        <div className="container"></div>
+        <div className="container">
+            <div className="todo-list">
+                <div>
+                    <h1 className="header">To-do list</h1>
+
+                    <div className="body">
+                        <div className="search-add-bar">
+                            <input 
+                                className="search-bar"
+                                type="text"
+                                placeholder="Add a new task..."
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                />
+                                <div 
+                                    className="btn-add-todo"
+                                    onClick={handleAdd}
+                                    style={{cursor: "pointer"}}
+                                    >
+                                        Add
+                                    </div>
+                        </div>
+
+                        <div className="buttons">
+                            <div 
+                                className="btn-all"
+                                onClick={() =>setFilter("Complete")}
+                                style={{cursor: "pointer"}}
+                                >
+                                    Complete
+                                </div>
+                        </div>
+
+                        <div style={{marginTop: "24px"}}>
+                            {visibleToDos.length === 0 ? (
+                                <div className="no-task"> No task yet. Add one above!</div>
+                             ) : (
+                                visibleToDos.map((todo) => (
+                                    <div
+                                        key={todo.id}
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "0px",
+                                        }}
+                                    >
+                                        <input 
+                                            type="checkbox"
+                                            checked={todo.isDone}
+                                            onChange={() => toggleToDo(todo.id)}
+                                        />
+                                        <span style={{
+                                            textDecoration: todo.isDone ? "line-through" : "none",
+                                        }}
+                                        >
+                                            {todo.text}
+                                        </span>
+                                    </div>
+
+                                    
+                                ))
+                             )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }

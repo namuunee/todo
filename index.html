@@ -3,13 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToDo</title>
+    <title>TODO LIST</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#6C5CE7',
+                            hover: '#5A4AD1',
+                            light: '#EEECFB',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #6C5CE7;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: justify-center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .custom-checkbox.checked {
+            background-color: #6C5CE7;
+        }
+    </style>
 </head>
-<body class="bg-black text-white">
-    <div class="mx-auto px-4">
-        Hello world
+<body class="bg-gray-800 flex items-center justify-center min-h-screen p-4 sm:p-8">
+    <div class="w-full max-w-4xl bg-[#F7F7F7] dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-lg shadow-2xl overflow-hidden min-h-[600px] flex flex-col relative transition-colors duration-300">
+        <div class="pt-10 pb-6 text-center">
+            <h1 class="text-2xl font-bold tracking-wider text-gray-800 dark:text-white uppercase">TODO LIST</h1>
+        </div>
+
+        
+        <div class="px-6 sm:px-16 md:px-24 mb-6">
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative flex-1 w-full">
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Search note..." 
+                        class="w-full px-4 py-2.5 pr-10 border-2 border-[#6C5CE7] rounded-lg focus:outline-none bg-transparent text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 text-sm font-medium"
+                    />
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6C5CE7] pointer-events-none">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                    <div class="relative inline-block text-left flex-1 sm:flex-initial">
+                        <select 
+                            id="filterSelect"
+                            class="w-full bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white font-semibold py-2.5 px-4 pr-8 rounded-lg appearance-none cursor-pointer focus:outline-none text-sm tracking-wide transition-colors uppercase"
+                        >
+                            <option value="ALL">ALL</option>
+                            <option value="COMPLETE">COMPLETE</option>
+                            <option value="INCOMPLETE">INCOMPLETE</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-white">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+
+                    
+                    <button 
+                        id="themeToggleBtn"
+                        aria-label="Toggle Theme"
+                        class="bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white p-2.5 rounded-lg flex items-center justify-center transition-colors focus:outline-none"
+                    >
+                        <i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        
+        <div class="px-6 sm:px-16 md:px-24 flex-1 pb-24 overflow-y-auto">
+            <div id="todoList" class="divide-y divide-purple-200 dark:divide-gray-700">
+                <!-- Dynamic Items will be rendered here -->
+            </div>
+            
+            
+            <div id="emptyState" class="hidden text-center py-12 text-gray-400 dark:text-gray-500">
+                <i data-lucide="clipboard-x" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                <p class="text-sm font-medium">No notes found</p>
+            </div>
+        </div>
+
+        <button 
+            id="openAddModalBtn"
+            aria-label="Add Note"
+            class="absolute bottom-8 right-8 sm:bottom-10 sm:right-12 bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:outline-none"
+        >
+            <i data-lucide="plus" class="w-6 h-6 stroke-[2.5]"></i>
+        </button>
+
     </div>
-    
+
+    <div id="noteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all">
+            <h2 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800 dark:text-white uppercase tracking-wide">NEW NOTE</h2>
+            
+            <input 
+                type="text" 
+                id="noteInput" 
+                placeholder="Enter your note..." 
+                class="w-full px-4 py-2.5 border-2 border-[#6C5CE7] rounded-lg focus:outline-none bg-transparent text-gray-800 dark:text-white placeholder-gray-400 mb-6 text-sm font-medium"
+            />
+            
+            <div class="flex justify-end gap-3">
+                <button 
+                    id="cancelModalBtn"
+                    class="px-5 py-2 border-2 border-[#6C5CE7] text-[#6C5CE7] dark:text-purple-300 font-semibold rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 text-sm transition-colors uppercase"
+                >
+                    CANCEL
+                </button>
+                <button 
+                    id="saveNoteBtn"
+                    class="px-5 py-2 bg-[#6C5CE7] hover:bg-[#5A4AD1] text-white font-semibold rounded-lg text-sm transition-colors uppercase"
+                >
+                    APPLY
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let todos = [
+            { id: 1, text: 'NOTE #1', completed: false },
+            { id: 2, text: 'NOTE #2', completed: true },
+            { id: 3, text: 'NOTE #3', completed: false }
+        ];
+
+        let editingId = null;
+
+        const todoList = document.getElementById('todoList');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const filterSelect = document.getElementById('filterSelect');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const openAddModalBtn = document.getElementById('openAddModalBtn');
+        const noteModal = document.getElementById('noteModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const noteInput = document.getElementById('noteInput');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const saveNoteBtn = document.getElementById('saveNoteBtn');
+
+        function initIcons() {
+            lucide.createIcons();
+        }
+
+        function renderTodos() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filterValue = filterSelect.value;
+
+            const filteredTodos = todos.filter(todo => {
+                const matchesSearch = todo.text.toLowerCase().includes(searchTerm);
+                const matchesFilter = 
+                    filterValue === 'ALL' || 
+                    (filterValue === 'COMPLETE' && todo.completed) || 
+                    (filterValue === 'INCOMPLETE' && !todo.completed);
+                return matchesSearch && matchesFilter;
+            });
+
+            todoList.innerHTML = '';
+
+            if (filteredTodos.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                
+                filteredTodos.forEach((todo) => {
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center justify-between py-4 group transition-colors';
+
+                    item.innerHTML = `
+                        <div class="flex items-center gap-4 cursor-pointer select-none flex-1" onclick="toggleComplete(${todo.id})">
+                            <div class="custom-checkbox ${todo.completed ? 'checked' : ''} flex items-center justify-center text-white">
+                                ${todo.completed ? '<i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>' : ''}
+                            </div>
+                            <span class="font-bold text-sm tracking-wide ${
+                                todo.completed 
+                                ? 'line-through text-gray-400 dark:text-gray-500' 
+                                : 'text-gray-800 dark:text-gray-100'
+                            }">
+                                ${escapeHtml(todo.text)}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-400 group-hover:opacity-100 opacity-90 transition-opacity">
+                            <button onclick="openEditModal(${todo.id})" class="hover:text-gray-600 dark:hover:text-gray-200 transition-colors" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteTodo(${todo.id})" class="hover:text-red-500 transition-colors" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    todoList.appendChild(item);
+                });
+            }
+
+            initIcons();
+        }
+
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function toggleComplete(id) {
+            todos = todos.map(todo => 
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            );
+            renderTodos();
+        }
+
+        function deleteTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            renderTodos();
+        }
+
+       
+        openAddModalBtn.addEventListener('click', () => {
+            editingId = null;
+            modalTitle.textContent = 'NEW NOTE';
+            noteInput.value = '';
+            noteModal.classList.remove('hidden');
+            noteInput.focus();
+        });
+
+        function openEditModal(id) {
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+            editingId = id;
+            modalTitle.textContent = 'EDIT NOTE';
+            noteInput.value = todo.text;
+            noteModal.classList.remove('hidden');
+            noteInput.focus();
+        }
+
+        
+        cancelModalBtn.addEventListener('click', () => {
+            noteModal.classList.add('hidden');
+        });
+
+        saveNoteBtn.addEventListener('click', handleSave);
+        noteInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSave();
+        });
+
+        function handleSave() {
+            const text = noteInput.value.trim();
+            if (!text) return;
+
+            if (editingId !== null) {
+                todos = todos.map(t => t.id === editingId ? { ...t, text } : t);
+            } else {
+                todos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+            }
+
+            noteModal.classList.add('hidden');
+            renderTodos();
+        }
+
+       
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            initIcons();
+        });
+
+        searchInput.addEventListener('input', renderTodos);
+        filterSelect.addEventListener('change', renderTodos);
+
+        window.onload = () => {
+            renderTodos();
+        };
+    </script>
 </body>
 </html>

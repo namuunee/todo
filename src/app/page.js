@@ -1,30 +1,30 @@
 "use client";
 
-import { useStats } from "react";
+import { useState } from "react";
 import "./globals.css";
 
 export default function Home() {
-    const [todes, setTodos] = useState([]);
-    const [iportValue, setInputValue] = useState("");
-    const [filter, setFilter] = useState ("All");
+    const [todos, setTodos] = useState([]);
+    const [inputValue, setInputValue] = useState("");
+    const [filter, setFilter] = useState("All");
 
     const handleAdd = () => {
-        if (inputValue === "" ) return;
+        if (inputValue === "") return;
 
         const newToDo = {
             id: Date.now(),
-            text: imputValue,
+            text: inputValue,
             isDone: false,
         };
 
-        setTodos([...setTodos, newToDo]);
+        setTodos([...todos, newToDo]);
         setInputValue("");
     };
 
     const toggleToDo = (idToToggle) => {
-        const updateList = setTodos.map((todo) => {
+        const updatedList = todos.map((todo) => {
             if (todo.id === idToToggle) {
-                return {...todo, isDone: !todo.isDone };
+                return { ...todo, isDone: !todo.isDone };
             }
             return todo;
         });
@@ -32,7 +32,13 @@ export default function Home() {
         setTodos(updatedList);
     };
 
-    const visibleToDos = setTodos.filter((todo) => {
+    // Added the delete function logic
+    const deleteTodo = (idToDelete) => {
+        const updatedList = todos.filter((todo) => todo.id !== idToDelete);
+        setTodos(updatedList);
+    };
+
+    const visibleToDos = todos.filter((todo) => {
         if (filter === "Active") return todo.isDone === false;
         if (filter === "Complete") return todo.isDone === true;
         return true;
@@ -52,59 +58,73 @@ export default function Home() {
                                 placeholder="Add a new task..."
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                />
-                                <div 
-                                    className="btn-add-todo"
-                                    onClick={handleAdd}
-                                    style={{cursor: "pointer"}}
-                                    >
-                                        Add
-                                    </div>
+                            />
+                            <div 
+                                className="btn-add-todo"
+                                onClick={handleAdd}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Add
+                            </div>
                         </div>
 
                         <div className="buttons">
                             <div 
                                 className="btn-all"
-                                onClick={() =>setFilter("Complete")}
-                                style={{cursor: "pointer"}}
-                                >
-                                    Complete
-                                </div>
+                                onClick={() => setFilter("Complete")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                Complete
+                            </div>
                         </div>
 
-                        <div style={{marginTop: "24px"}}>
+                        <div style={{ marginTop: "24px" }}>
                             {visibleToDos.length === 0 ? (
-                                <div className="no-task"> No task yet. Add one above!</div>
-                             ) : (
+                                <div className="no-task">No task yet. Add one above!</div>
+                            ) : (
                                 visibleToDos.map((todo) => (
-                                    <div
+                                    // Moved key to the fragment to fix React warnings
+                                    <div 
                                         key={todo.id}
                                         style={{
                                             display: "flex",
                                             alignItems: "center",
-                                            gap: "0px",
+                                            justifyContent: "space-between",
+                                            marginBottom: "8px"
                                         }}
                                     >
-                                        <input 
-                                            type="checkbox"
-                                            checked={todo.isDone}
-                                            onChange={() => toggleToDo(todo.id)}
-                                        />
-                                        <span style={{
-                                            textDecoration: todo.isDone ? "line-through" : "none",
-                                        }}
-                                        >
-                                            {todo.text}
-                                        </span>
-                                    </div>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                            <input 
+                                                type="checkbox"
+                                                checked={todo.isDone}
+                                                onChange={() => toggleToDo(todo.id)}
+                                            />
+                                            <span style={{
+                                                textDecoration: todo.isDone ? "line-through" : "none",
+                                            }}>
+                                                {todo.text}
+                                            </span>
+                                        </div>
 
-                                    
+                                        <div 
+                                            onClick={() => deleteTodo(todo.id)}
+                                            style={{
+                                                color: "red",
+                                                cursor: "pointer",
+                                                fontSize: "16px"
+                                            }}
+                                        >
+                                            Delete
+                                        </div>
+                                    </div>
                                 ))
-                             )}
+                            )}
                         </div>
                     </div>
                 </div>
+
+                <div className="footer">Powered by Pinecone academy</div>
             </div>
         </div>
-    )
+    );
 }
